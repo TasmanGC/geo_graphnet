@@ -2,6 +2,9 @@ dgl==1.1.1
 pandas==2.0
 optuna==3.2
 optuna-dashboard==0.10
+torch==2.0.1
+torchvision==2.0.2
+torchaudio==0.15.2
 
 # used for notebooks and visualisation
 matplotlib
