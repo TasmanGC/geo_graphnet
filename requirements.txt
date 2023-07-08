@@ -1,0 +1,13 @@
+dgl==1.1.1
+pandas==2.0
+optuna==3.2
+optuna-dashboard==0.10
+
+# used for notebooks and visualisation
+matplotlib
+ipykernel
+colorcet
+pyvista
+
+# used for testing
+pytest
