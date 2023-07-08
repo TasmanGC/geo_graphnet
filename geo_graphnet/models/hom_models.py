@@ -54,7 +54,7 @@ class WGCN(nn.Module):
         self.conv2 = WGraphConv(hid_feats, num_classes)
 
     def forward(self, g, in_feat): # TODO these forward methods should always just take a graph in
-        edge_weight = 
+        edge_weight = g.edata['edge_weights']
         # Apply graph convolution and activation.
         h = self.conv1(g, in_feat, edge_weight)
         h = F.relu(h)
