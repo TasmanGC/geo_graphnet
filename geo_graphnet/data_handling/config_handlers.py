@@ -8,9 +8,11 @@ class GeoGraphConfig:
             'feature_list',
             'value_fields',
             'label_field',
+            'train_role',
             'node_type',
             'graph_con_method',
-            'graph_con_variables',     
+            'graph_con_variables',
+            'random_embedding'     
         ]
         
         if set(required_keys).issubset(set(config_object.keys())):
@@ -45,9 +47,11 @@ class GeoGraphConfig:
     def from_method_config(cls, config_object:dict):
         required_keys = [
             'method_type',
-            'num_epochs',
+            'epochs',
             'loss',
-            'optimiser'
+            'optimiser',
+            'lr',
+            'repeats'
         ]
         
         if set(required_keys).issubset(set(config_object.keys())):
