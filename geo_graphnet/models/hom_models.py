@@ -44,6 +44,7 @@ class GCN(nn.Module):
         h = F.relu(h)
         h = self.conv2(g, h)
         h = F.softmax(h,dim=1)
+        h = F.log_softmax(h, dim=1) # NOTE this is the currently implemnted behaviour but is dumb might need to fix
         return h
 
 class WGCN(nn.Module):
@@ -52,12 +53,14 @@ class WGCN(nn.Module):
         self.conv1 = WGraphConv(in_feats, hid_feats)
         self.conv2 = WGraphConv(hid_feats, num_classes)
 
-    def forward(self, g, in_feat, edge_weight): # TODO these forward methods should always just take a graph in
+    def forward(self, g, in_feat): # TODO these forward methods should always just take a graph in
+        edge_weight = 
         # Apply graph convolution and activation.
         h = self.conv1(g, in_feat, edge_weight)
         h = F.relu(h)
         h = self.conv2(g, h, edge_weight)
         h = F.softmax(h,dim=1)
+        h = F.log_softmax(h, dim=1) # NOTE this is the currently implemnted behaviour but is dumb might need to fix
         return h
 
 class GAT(nn.Module):
@@ -69,8 +72,8 @@ class GAT(nn.Module):
         # one attention head in the output layer.
         self.layer2 = GATConv(hid_feat*num_heads, num_classes, 1)
 
-    def forward(self, g, h): # TODO these forward methods should always just take a graph in
-        h,a_1 = self.layer1(g, h, get_attention=True)
+    def forward(self, g, in_feat): # TODO these forward methods should always just take a graph in
+        h, a_1 = self.layer1(g, in_feat, get_attention=True)
         # Concat last 2 dim (num_heads * out_dim)
         h = h.view(-1, h.size(1) * h.size(2)) # (in_feat, num_heads, out_dim) -> (in_feat, num_heads * out_dim)
         h = F.elu(h)
@@ -78,4 +81,6 @@ class GAT(nn.Module):
         # Sueeze the head dim as it's = 1 
         h = h.squeeze() # (in_feat, 1, out_dim) -> (in_feat, out_dim)
         h = F.softmax(h,dim=1)
-        return(h,[a_1,a_2])
+        h = F.log_softmax(h, dim=1) # NOTE this is the currently implemnted behaviour but is dumb might need to fix
+        # NOTE disabling return of attention weights for now
+        return(h)#,[a_1,a_2])
