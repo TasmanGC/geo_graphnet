@@ -3,14 +3,15 @@ pandas==2.0
 optuna==3.2
 optuna-dashboard==0.10
 torch==2.0.1
-torchvision==2.0.2
-torchaudio==0.15.2
+torchvision
+torchaudio
 
 # used for notebooks and visualisation
 matplotlib
 ipykernel
 colorcet
 pyvista
+sklearn
 
 # used for testing
 pytest
