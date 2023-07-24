@@ -1,5 +1,5 @@
 from dgl.nn.pytorch import GATConv, GraphConv
-from custom_layers import WGraphConv
+from .custom_layers import WGraphConv
 import torch.nn.functional as F
 import torch.nn as nn
 import dgl

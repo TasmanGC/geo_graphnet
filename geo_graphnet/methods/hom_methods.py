@@ -7,7 +7,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from dgl import graph as dgl_graph
 import warnings
-from core import calc_accuracy
+from .core import calc_accuracy
 import numpy as np
 
 def semi_supervised_pred(graph:dgl_graph,
