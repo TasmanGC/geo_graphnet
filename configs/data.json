@@ -1,0 +1,10 @@
+{
+    "feature_list"          : ["x_loc"],
+    "value_fields"          : ["cond","runc"],
+    "label_field"           : "label",
+    "train_role"            : "train",
+    "node_type"             : "None",
+    "graph_con_method"      : "None",
+    "graph_con_variables"   : {},
+    "random_embedding"      : 0  
+}
