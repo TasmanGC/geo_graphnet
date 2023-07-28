@@ -1,0 +1,8 @@
+{
+    "method_type"   :"semi",
+    "epochs"        :100,
+    "loss"          :"nll_loss",
+    "optimiser"     :"Adam",
+    "lr"            :0.01,
+    "repeats"       :100
+}
