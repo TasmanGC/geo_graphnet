@@ -36,7 +36,7 @@ def semi_supervised_pred(graph:dgl_graph,
         raise KeyError("Graph does not contain expected keys.")
     
     # define inputs and trainingselection
-    node_embed = nn.Embedding(dgl_graph.num_nodes, model_config.in_feats)
+    node_embed = nn.Embedding(graph.num_nodes(), model_config.in_feats)
     
     # if we use a real feature set
     if len(data_config.value_fields) > 0:
@@ -51,7 +51,7 @@ def semi_supervised_pred(graph:dgl_graph,
 
     # loading the ml/learnable params
     optim_obj = getattr(optim, method_config.optimiser)
-    parameters = itertools.chain(model.parameters(), node_embed.paramters())
+    parameters = itertools.chain(model.parameters(), node_embed.parameters())
     optimiser = optim_obj(parameters, method_config.lr)
     loss_obj = getattr(F, method_config.loss)
     
