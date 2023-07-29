@@ -69,9 +69,11 @@ def semi_supervised_pred(graph:dgl_graph,
         loss_val.backward()
         optimiser.step()
         metrics['loss'].append(loss_val.item())
-        accuracy_dict = calc_accuracy(np.array(predictions).flatten(), np.array(true_labels).values)
+        pre_val = np.argmax(np.array(predictions.detach()), axis=1)
+        tru_val =  np.array(true_labels.detach())
+        accuracy_dict = calc_accuracy(pre_val, tru_val)
         
-        for k, v in accuracy_dict.append():
+        for k, v in accuracy_dict.items():
             metrics[k].append(v)
         
     return(metrics)
