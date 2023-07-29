@@ -10,11 +10,28 @@ import warnings
 from .core import calc_accuracy
 import numpy as np
 
+
+disclaimer =    """ geo_graphnet performs semi-supervised prediction using GNN on geoscience
+                    data. Copyright (C) 2023  Tasman Gillfeather-Clark
+
+                    This program is free software: you can redistribute it and/or modify
+                    it under the terms of the GNU General Public License as published by
+                    the Free Software Foundation version 3 of the License
+
+                    This program is distributed in the hope that it will be useful,
+                    but WITHOUT ANY WARRANTY; without even the implied warranty of
+                    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+                    GNU General Public License for more details.
+
+                    You should have received a copy of the GNU General Public License
+                    along with this program.  If not, see <https://www.gnu.org/licenses/>."""
+
 def semi_supervised_pred(graph:dgl_graph,
                          data_config:GeoGraphConfig,
                          model_config:GeoGraphConfig, 
                          method_config:GeoGraphConfig):
     
+    print(disclaimer)
     # determine if working with real features or random embedding
     if len(data_config.value_fields) > 0 and data_config.random_embedding > 0:
         warnings.warn('''Features and random embedding configuration detected. 
