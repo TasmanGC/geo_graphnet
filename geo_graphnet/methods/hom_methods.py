@@ -64,7 +64,7 @@ def semi_supervised_pred(graph:dgl_graph,
     for _ in range(method_config.epochs):
         
         predictions = model(graph, node_embed.weight)
-        loss_val = loss_obj(predictions[train_selection], true_labels[train_selection])
+        loss_val = loss_obj(predictions[train_selection], true_labels[train_selection].long())
         optimiser.zero_grad()
         loss_val.backward()
         optimiser.step()

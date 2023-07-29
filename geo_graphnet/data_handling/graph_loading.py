@@ -25,9 +25,9 @@ def load_homo_graph(node_file : Path, edge_file : Path) -> dgl.graph:
         if any(isinstance(val, str) for val in v):
             mapping = {k:i for i,k in enumerate(list(set(v)))}
             mapped = np.array([mapping[x] for x in v],dtype=int)
-            features[k] = torch.from_numpy(mapped)
+            features[k] = torch.as_tensor(mapped,dtype=torch.float32)
         else:
-            features[k] = torch.from_numpy(np.array(v))
+            features[k] = torch.as_tensor(np.array(v),dtype=torch.float32)
         
     graph.ndata.update(features)
     
