@@ -95,4 +95,4 @@ def semi_supervised_pred(graph:dgl_graph,
         
         graph.ndata[f'Prediction_Epoch_{str(i).zfill(4)}'] = predictions
         
-    return(metrics,graph)
+    return(metrics,graph,[model_config,data_config,method_config])
