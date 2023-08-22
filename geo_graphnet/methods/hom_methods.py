@@ -78,7 +78,7 @@ def semi_supervised_pred(graph:dgl_graph,
     metrics['prec'] = []
     metrics['recall'] = []
     
-    for _ in range(method_config.epochs):
+    for i in range(method_config.epochs):
         
         predictions = model(graph, node_embed.weight)
         loss_val = loss_obj(predictions[train_selection], true_labels[train_selection].long())
@@ -93,4 +93,6 @@ def semi_supervised_pred(graph:dgl_graph,
         for k, v in accuracy_dict.items():
             metrics[k].append(v)
         
-    return(metrics)
+        graph.ndata[f'Prediction_Epoch_{str(i).zfill(4)}'] = predictions
+        
+    return(metrics,graph)
