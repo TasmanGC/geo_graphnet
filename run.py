@@ -2,7 +2,7 @@ import json
 import torch
 import numpy as np
 
-from geo_graphnet.methods.hom_methods import semi_supervised_pred
+from geo_graphnet.methods.hom_methods import SemiSupervisedPred, disclaimer 
 from geo_graphnet.data_handling.config_handlers import GeoGraphConfig
 from geo_graphnet.data_handling.graph_loading import load_homo_graph
 
@@ -24,5 +24,6 @@ method_config = GeoGraphConfig.from_method_config(data)
 with open(r'C:\Users\bogo\Desktop\code\geo_graphnet\configs\model.json', "r") as read_file:
     data = json.load(read_file)
 model_config = GeoGraphConfig.from_model_config(data)
-
-semi_supervised_pred(graph, data_config,model_config,method_config)
+print(disclaimer)
+method = SemiSupervisedPred(graph, data_config,model_config,method_config)
+method.run_exp()
