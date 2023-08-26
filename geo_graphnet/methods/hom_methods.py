@@ -1,3 +1,5 @@
+import warnings
+warnings.simplefilter("ignore", UserWarning)
 from geo_graphnet.data_handling.config_handlers import GeoGraphConfig
 from geo_graphnet.models.hom_models import initialise_model
 from torch import optim
@@ -24,75 +26,113 @@ disclaimer =    """ geo_graphnet performs semi-supervised prediction using GNN o
                     GNU General Public License for more details.
 
                     You should have received a copy of the GNU General Public License
-                    along with this program.  If not, see <https://www.gnu.org/licenses/>."""
+                    along with this program.  If not, see <https://www.gnu.org/licenses/>.\n"""
 
-def semi_supervised_pred(graph:dgl_graph,
-                         data_config:GeoGraphConfig,
-                         model_config:GeoGraphConfig, 
-                         method_config:GeoGraphConfig):
-    
-    print(disclaimer)
-    # determine if working with real features or random embedding
-    if len(data_config.value_fields) > 0 and data_config.random_embedding > 0:
-        warnings.warn('''Features and random embedding configuration detected. 
-                      \n Default to real features.''')
-        data_config.random_embedding = 0
-    
-    # checking that the features that will be selected are the same size the models input shape
-    if len(data_config.value_fields) != model_config.in_feats:
-        if data_config.random_embedding > 0:
-            model_config.in_feats = data_config.random_embedding
-        elif len(data_config.value_fields) > 0:
-            model_config.in_feats = len(model_config.value_fields)
-            warnings.warn(f'''Warning: Number of selected features[{len(data_config.value_fields)}]
-                      != model input setting [{model_config.in_feats}]!
-                      \n Setting to Number of selected features[{len(data_config.value_fields)}].''')
+class SemiSupervisedPred:
+    def __init__(self,
+                graph : dgl_graph,
+                data_config : GeoGraphConfig,
+                model_config : GeoGraphConfig, 
+                method_config : GeoGraphConfig
+                ):
+        self.graph = graph
+        self.data_config = data_config
+        self.model_config = model_config
+        self.method_config = method_config
+        self.set_up_experiment()
+        self.has_run = False
         
-    # ensure the features selected are part of the graph object
-    if not set(data_config.value_fields).issubset(list(graph.ndata.keys())):
-        raise KeyError("Graph does not contain expected keys.")
-    
-    # define inputs and trainingselection
-    node_embed = nn.Embedding(graph.num_nodes(), model_config.in_feats)
-    
-    # if we use a real feature set
-    if len(data_config.value_fields) > 0:
-        real_feats = list(zip(*[graph.ndata[feature] for feature in data_config.value_fields]))
-        node_embed.weight = nn.Parameter(tensor(real_feats),requires_grad=True)
+    def set_up_experiment(self):
+        # determine if working with real features or random embedding
+        if len(self.data_config.value_fields) > 0 and self.data_config.random_embedding > 0:
+            warnings.warn('''Features and random embedding configuration detected. 
+                        \n Default to real features.''')
+            self.data_config.random_embedding = 0
         
-    train_selection = graph.ndata[data_config.train_role].bool()
-    true_labels = graph.ndata[data_config.label_field]
-    
-    # initialise the model
-    model = initialise_model(model_config)
+        # checking that the features that will be selected are the same size the models input shape
+        if len(self.data_config.value_fields) != self.model_config.in_feats:
+            if self.data_config.random_embedding > 0:
+                self.model_config.in_feats = self.data_config.random_embedding
+            elif len(self.data_config.value_fields) > 0:
+               self.model_config.in_feats = len(self.model_config.value_fields)
+               warnings.warn(f'''Warning: Number of selected features[{len(self.data_config.value_fields)}]
+                                != model input setting [{self.model_config.in_feats}]!
+                                \n Setting to Number of selected features[{len(self.data_config.value_fields)}].''')
+            
+        # ensure the features selected are part of the graph object
+        if not set(self.data_config.value_fields).issubset(list(self.graph.ndata.keys())):
+            raise KeyError("Graph does not contain expected keys.")
+        
+        # define inputs and trainingselection
+        self.node_embed = nn.Embedding(self.graph.num_nodes(), self.model_config.in_feats)
+        
+        # if we use a real feature set
+        if len(self.data_config.value_fields) > 0:
+            self.real_feats = list(zip(*[self.graph.ndata[feature] for feature in self.data_config.value_fields]))
+            self.node_embed.weight = nn.Parameter(tensor(self.real_feats),requires_grad=True)
+            
+        self.train_selection = self.graph.ndata[self.data_config.train_role].bool()
+        self.true_labels = self.graph.ndata[self.data_config.label_field]
+        
+        # initialise the model
+        self.model = initialise_model(self.model_config)
 
-    # loading the ml/learnable params
-    optim_obj = getattr(optim, method_config.optimiser)
-    parameters = itertools.chain(model.parameters(), node_embed.parameters())
-    optimiser = optim_obj(parameters, method_config.lr)
-    loss_obj = getattr(F, method_config.loss)
-    
-    metrics = {}
-    metrics['loss'] = []
-    metrics['f1'] = []
-    metrics['prec'] = []
-    metrics['recall'] = []
-    
-    for i in range(method_config.epochs):
+        # loading the ml/learnable params
+        self.optim_obj = getattr(optim, self.method_config.optimiser)
+        self.parameters = itertools.chain(self.model.parameters(), self.node_embed.parameters())
+        self.optimiser = self.optim_obj(self.parameters, self.method_config.lr)
+        self.loss_obj = getattr(F, self.method_config.loss)
         
-        predictions = model(graph, node_embed.weight)
-        loss_val = loss_obj(predictions[train_selection], true_labels[train_selection].long())
-        optimiser.zero_grad()
-        loss_val.backward()
-        optimiser.step()
-        metrics['loss'].append(loss_val.item())
+        self.metrics = {}
+        self.metrics['loss'] = []
+        self.metrics['f1'] = []
+        self.metrics['prec'] = []
+        self.metrics['recall'] = []
+        
+    def run_exp(self):
+        if self.has_run:
+            raise AttributeError('This experiment has already been run.')
+        
+        self.has_run = True
+        for i in range(self.method_config.epochs):
+            
+            predictions = self.model(self.graph, self.node_embed.weight)
+            self.loss_val = self.loss_obj(predictions[self.train_selection], self.true_labels[self.train_selection].long())
+            self.optimiser.zero_grad()
+            self.loss_val.backward()
+            self.optimiser.step()
+            self.metrics['loss'].append(self.loss_val.item())
+            pre_val = np.argmax(np.array(predictions.detach()), axis=1)
+            tru_val =  np.array(self.true_labels.detach())
+            accuracy_dict = calc_accuracy(pre_val, tru_val)
+            
+            for k, v in accuracy_dict.items():
+                self.metrics[k].append(v)
+            
+            self.graph.ndata[f'Prediction_Epoch_{str(i).zfill(4)}'] = predictions
+            
+        return(self.metrics, self.graph, [self.model_config,self.data_config,self.method_config])
+
+    def run_iter(self,i):
+        
+        if self.has_run:
+            self.method_config.epochs = self.method_config.epochs + 1
+        else:
+            self.method_config.epochs = 1
+        
+        self.has_run = True
+            
+        predictions = self.model(self.graph, self.node_embed.weight)
+        self.loss_val = self.loss_obj(predictions[self.train_selection], self.true_labels[self.train_selection].long())
+        self.optimiser.zero_grad()
+        self.loss_val.backward()
+        self.optimiser.step()
+        self.metrics['loss'].append(self.loss_val.item())
         pre_val = np.argmax(np.array(predictions.detach()), axis=1)
-        tru_val =  np.array(true_labels.detach())
-        accuracy_dict = calc_accuracy(pre_val, tru_val)
-        
+        tru_val =  np.array(self.true_labels.detach())
+        accuracy_dict = calc_accuracy(pre_val, tru_val)        
+        self.graph.ndata[f'Prediction_Epoch_{str(i).zfill(4)}'] = predictions
         for k, v in accuracy_dict.items():
-            metrics[k].append(v)
-        
-        graph.ndata[f'Prediction_Epoch_{str(i).zfill(4)}'] = predictions
-        
-    return(metrics,graph,[model_config,data_config,method_config])
+                self.metrics[k].append(v)
+                
+        return(self.metrics['loss'][-1])
