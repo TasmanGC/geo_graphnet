@@ -5,8 +5,8 @@ class GeoGraphConfig:
         self.type = None
         
     @classmethod
-    def config2json(cls):
-        return({x:y for x,y in vars(cls).items() if '__' not in x})
+    def config__2json(cls):
+        return({x:y for x,y in vars(cls).items() if not any(sub in x for sub in ['__','from'])})
     
     @classmethod
     def from_data_config(cls, config_object:dict):
