@@ -95,7 +95,7 @@ class Scene3D:
             )
 
         # visualise and save
-        cpos = plotter.show()
+        cpos = plotter.show(return_cpos = True)
         return cpos
 
     # def animation(self,cpos=None): # FUTURES
