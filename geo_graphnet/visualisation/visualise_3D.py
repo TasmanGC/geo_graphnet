@@ -97,9 +97,50 @@ class Scene3D:
         # visualise and save
         cpos = plotter.show(return_cpos = True)
         return cpos
+    
+    def save_image(self,
+                   save_name = "default.png",
+                   win_size: Tuple = (1500, 1000),
+                   plot_cons: bool = False,
+                   cpos=None,
+                   c_map: str = "GnBu_r",
+                   ps: int = 50,
+                   sbar_args: dict = {},
+                ):
+        # update class state
+        self.plot_cons = plot_cons
+        self.cpos = cpos
+
+        plotter = pv.Plotter(off_screen=True, title=self.plot_title)
+        #plotter.off_screen = True
+
+        if self.cpos != None:
+            plotter.camera_position = cpos
+        
+        plotter.window_size = win_size
+
+        # create polydata_objects
+        self._create3DGraph()
+
+        if self.plot_cons:
+            self._create3DEdges()
+
+        plotter.add_mesh(
+            self.pv_graph,
+            render_points_as_spheres=True,
+            cmap=c_map,
+            point_size=ps,
+            scalar_bar_args=sbar_args,
+        )
+
+        if self.plot_cons:
+            plotter.add_mesh(
+                self.pv_edges, show_edges=True, edge_color=[0, 0, 0], opacity=0.2
+            )
+            
+        plotter.show(auto_close=False)
+        image = plotter.screenshot(save_name, scale=4)
 
     # def animation(self,cpos=None): # FUTURES
     #     pass
 
-    # def single_plot(self,cpos=None): # FUTURES
-    #     pass
