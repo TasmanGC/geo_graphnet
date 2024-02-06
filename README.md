@@ -7,6 +7,7 @@ This project is ongoing with the intent of extending this repositories functiona
 
 ### Usage
 You can run a one shot experiment using configs defined in the config dir and any node/edge set you have access to.
+This makes it easy to execute a given experiment.
 
     >>>(.venv) C:\path\to\repo\geo_graphnet> python run.py 
 
