@@ -1,17 +1,17 @@
-dgl==1.1.1
-pandas==2.0
-optuna==3.2
-optuna-dashboard==0.10
-torch==2.0.1
-torchvision
-torchaudio
+dgl==2.2.1
+pandas==2.2.3
+optuna==4.2.1
+optuna-dashboard==0.17.0
+torch==2.6.0
+torchvision==0.21.0
+torchaudio==2.6.0
 
 # used for notebooks and visualisation
-matplotlib
+matplotlib==3.10.0
 ipykernel
-colorcet
-pyvista
-sklearn
+colorcet==3.1.0
+pyvista==0.44.2
+scikit-learn==1.6.1
 
 # used for testing
-pytest
+pytest==8.3.4
